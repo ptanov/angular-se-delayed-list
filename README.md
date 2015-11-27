@@ -1,9 +1,15 @@
 # What is this
-
 TODO
-Demo:
 
-Limitations:
+# Demo:
+See http://ptanov.github.io/angular-se-delayed-list/demo and https://github.com/ptanov/angular-se-delayed-list/tree/master/demo
+
+# Install:
+
+ - ```bower install angular-se-delayed-list --save```
+ - Add ```angular.module("seDelayedListDirectiveDemoApp", ["seDelayedList"])...```
+
+# Limitations:
  - *jQuery* is required - find("[data-ng-repeat]");
  - works only if ng-repeat is set with data-ng-repeat
 
