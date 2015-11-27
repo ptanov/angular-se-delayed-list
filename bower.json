@@ -14,7 +14,7 @@
     "Plamen Tanov <ptanov@setelis.com>"
   ],
   "description": "Partially/Delayed load a list in Angular ng-repeat",
-  "main": "src/seDelayedListModule.js",
+  "main": ["src/seDelayedListModule.js", "src/seDelayedListDirective.js", "src/seDelayedListFillDirective.js"],
   "keywords": [
     "angular",
     "ng-repeat",
