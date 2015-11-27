@@ -26,7 +26,7 @@ describe("seDelayedList", function () {
 
 			$compile(element);
 
-			expect(repeatElement.attr("data-ng-repeat")).toBe("user in demoCtrl.users | limitTo:demoCtrl.limit");
+			expect(repeatElement.attr("data-ng-repeat")).toBe("user in demoCtrl.users | limitTo:demoCtrl.limit ");
 		}));
 
 		it("should add limitTo if there is track by", inject(function () {
@@ -38,7 +38,7 @@ describe("seDelayedList", function () {
 
 			$compile(element);
 
-			expect(repeatElement.attr("data-ng-repeat")).toBe("user in demoCtrl.users | limitTo:demoCtrl.limit track by user.id");
+			expect(repeatElement.attr("data-ng-repeat")).toBe("user in demoCtrl.users  | limitTo:demoCtrl.limit track by user.id");
 		}));
 
 		it("should add limitTo if there is \\s between track and by", inject(function () {
@@ -50,11 +50,46 @@ describe("seDelayedList", function () {
 
 			$compile(element);
 
-			expect(repeatElement.attr("data-ng-repeat")).toBe("user in demoCtrl.users | limitTo:demoCtrl.limit track" +
+			expect(repeatElement.attr("data-ng-repeat")).toBe("user in demoCtrl.users  | limitTo:demoCtrl.limit track" +
 				" " + " " + " " + "	" + " " + " by user.id");
 		}));
-	});
 
+		it("should add limitTo if there is track by and expression is multiline", inject(function () {
+			element = angular.element(
+				"<div data-se-delayed-list='demoCtrl.limit'>" +
+				"	<div data-ng-repeat='user    \n   \n   in    \n   \n   demoCtrl.users    \n  \n   \ntrack by user.id' ></div>" +
+				"</div>");
+			repeatElement = element.find("div");
+
+			$compile(element);
+
+			expect(repeatElement.attr("data-ng-repeat")).toBe("user    \n   \n   in    \n   \n   demoCtrl.users    \n  \n   \n | limitTo:demoCtrl.limit track by user.id");
+		}));
+		it("should add limitTo if there is track by and expression is multiline", inject(function () {
+			element = angular.element(
+				"<div data-se-delayed-list='demoCtrl.limit'>" +
+				"	<div data-ng-repeat='user in demoCtrl.users\ntrack by user.id' ></div>" +
+				"</div>");
+			repeatElement = element.find("div");
+
+			$compile(element);
+
+			expect(repeatElement.attr("data-ng-repeat")).toBe("user in demoCtrl.users\n | limitTo:demoCtrl.limit track by user.id");
+		}));
+
+		it("should add limitTo if there is no track by and expression is multiline", inject(function () {
+			element = angular.element(
+				"<div data-se-delayed-list='demoCtrl.limit'>" +
+				"	<div data-ng-repeat='user in\ndemoCtrl.users' ></div>" +
+				"</div>");
+			repeatElement = element.find("div");
+
+			$compile(element);
+
+			expect(repeatElement.attr("data-ng-repeat")).toBe("user in\ndemoCtrl.users | limitTo:demoCtrl.limit ");
+		}));
+
+	});
 
 	describe("link stage", function () {
 		describe("resetLimitEverytimeFilterIsChanged", function () {
@@ -175,6 +210,22 @@ describe("seDelayedList", function () {
 				element = angular.element(
 					"<div data-se-delayed-list='demoCtrl.limit'>" +
 					"	<div data-ng-repeat='user in demoCtrl.users' ></div>" +
+					"</div>");
+				repeatElement = element.find("div");
+
+				element = $compile(element)(scope);
+				var controller = element.data("$seDelayedListController");
+				// to create at least one ng-repeat element:
+				scope.$digest();
+				expect(controller.getElementsCount()).toBe(scope.demoCtrl.users.length);
+				scope.demoCtrl.users.push({});
+				scope.demoCtrl.users.push({});
+				expect(controller.getElementsCount()).toBe(scope.demoCtrl.users.length);
+			}));
+			it("should support multiline ng-repeat", inject(function () {
+				element = angular.element(
+					"<div data-se-delayed-list='demoCtrl.limit'>" +
+					"	<div data-ng-repeat='user   \n   \n  in   \n \n  \n demoCtrl.users' ></div>" +
 					"</div>");
 				repeatElement = element.find("div");
 

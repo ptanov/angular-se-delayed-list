@@ -27,9 +27,8 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 							return null;
 						}
 						var repeatExpression = repeatElement.attr(ATTR_NG_REPEAT);
-
 						// always there should be | - for limitTo
-						var trackByRegex = /.+\sin\s(.+)\|.+/g;
+						var trackByRegex = /.+\s+in\s+(.+)\|.+/g;
 						var match = trackByRegex.exec(repeatExpression);
 						if (!match) {
 							throw "seDelayedList: can't get list name: " + repeatExpression;
@@ -61,11 +60,12 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 			}
 			function incrementLimit(limitHolder) {
 				$timeout(function() {
-					var newValue = controller.getLimit() + DEFAULT_ITEMS_PER_ITERATION_COUNT;
+					var elementsCount = controller.getElementsCount();
+					var newValue = Math.min(controller.getLimit() + DEFAULT_ITEMS_PER_ITERATION_COUNT, elementsCount);
 
 					limitHolder.assign($scope, newValue);
 
-					if (newValue < controller.getElementsCount()) {
+					if (newValue < elementsCount) {
 						incrementLimit(limitHolder);
 					}
 				}, DEFAULT_INTERVAL);
@@ -80,7 +80,7 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 		compile: function(element, attrs) {
 			function addLimitTo(repeatElement) {
 				function getPositionToInsert(repeatExpression) {
-					var trackByRegex = /(.+)\strack\s+by\s.+/g;
+					var trackByRegex = /([^]+)track\s+by\s+.+/g;
 					var match = trackByRegex.exec(repeatExpression);
 					if (!match) {
 						return repeatExpression.length;
@@ -90,7 +90,7 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 
 				var repeatExpression = repeatElement.attr(ATTR_NG_REPEAT);
 				var positionToInsert = getPositionToInsert(repeatExpression);
-				var limitTo = " | limitTo:" + attrs.seDelayedList;
+				var limitTo = " | limitTo:" + attrs.seDelayedList + " ";
 
 				var result = repeatExpression.slice(0, positionToInsert) + limitTo + repeatExpression.slice(positionToInsert);
 
