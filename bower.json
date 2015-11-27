@@ -1,12 +1,34 @@
 {
-   "name": "angular-se-delayed-list",
-   "version": "0.0.1",
-   "dependencies": {
-      "jquery": "~2.2.4",
-      "angular": "~1.4.3"
-   },
-   "devDependencies": {
-      "angular-mocks": "~1.4.3",
-      "angular-scenario": "~1.4.3"
-   }
+  "name": "angular-se-delayed-list",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "~2.2.4",
+    "angular": "~1.4.3"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.4.3",
+    "angular-scenario": "~1.4.3"
+  },
+  "homepage": "https://github.com/ptanov/angular-se-delayed-list",
+  "authors": [
+    "Plamen Tanov <ptanov@setelis.com>"
+  ],
+  "description": "Partially/Delayed load a list in Angular ng-repeat",
+  "main": "src/seDelayedListModule.js",
+  "keywords": [
+    "angular",
+    "ng-repeat",
+    "load",
+    "list",
+    "partially",
+    "delayed"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }
