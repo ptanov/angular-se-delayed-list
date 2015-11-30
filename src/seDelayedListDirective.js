@@ -1,44 +1,27 @@
 angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", function() {
 	"use strict";
-	var DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST = 25;
-	var DEFAULT_ITEMS_PER_ITERATION_COUNT = DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST;
+	var DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST = 30;
+	var DEFAULT_ITEMS_PER_ITERATION_COUNT = 25;
 	var DEFAULT_INTERVAL = 40;
 
 	var ATTR_NG_REPEAT = "data-ng-repeat";
 	function getRepeatElement(element) {
 		var result = element.find("["+ATTR_NG_REPEAT+"]");
 		if (result.length === 0) {
-			return null;
+			throw "seDelayedList: no repeat element";
 		}
 		return result;
 	}
 	return {
 		restrict: "A",
-		controller: ["$scope", "$element", "$attrs", "$parse", "$timeout", function($scope, $element, $attrs, $parse, $timeout) {
+		controller: ["$scope", "$element", "$attrs", "$parse", "$interval", function($scope, $element, $attrs, $parse, $interval) {
 			var controller = this;
+			var listVariableExpression = $attrs.$$seDelayedListListVariableExpression;
+			var listVariableHolder = $parse(listVariableExpression);
+			var intervalPromise;
 
 			function atachMethods(limitHolder) {
-				var listVariableHolder;
 				controller.getElementsCount = function getElementsCount() {
-					function getListVariableHolder() {
-						var repeatElement = getRepeatElement($element);
-						if (!repeatElement) {
-							// this can be null if there are no elements
-							return null;
-						}
-						var repeatExpression = repeatElement.attr(ATTR_NG_REPEAT);
-						// always there should be | - for limitTo
-						var trackByRegex = /.+\s+in\s+(.+)\|.+/g;
-						var match = trackByRegex.exec(repeatExpression);
-						if (!match) {
-							throw "seDelayedList: can't get list name: " + repeatExpression;
-						}
-						return $parse(match[1]);
-					}
-					listVariableHolder = listVariableHolder || getListVariableHolder();
-					if (!listVariableHolder) {
-						return 0;
-					}
 					return (listVariableHolder($scope)||[]).length;
 				};
 
@@ -47,49 +30,49 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 				};
 			}
 
-			function resetLimitEverytimeFilterIsChanged(limitHolder) {
+			function resetLimitEverytimeFilterOrListIsChanged(limitHolder) {
+				function startIncrementing() {
+					stopIncrementing();
+
+					limitHolder.assign($scope, DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
+
+					intervalPromise = $interval(function() {
+						var elementsCount = controller.getElementsCount();
+						var newValue = controller.getLimit() + DEFAULT_ITEMS_PER_ITERATION_COUNT;
+
+						limitHolder.assign($scope, newValue);
+
+						if (newValue >= elementsCount) {
+							stopIncrementing();
+						}
+					}, DEFAULT_INTERVAL);
+				}
+				function stopIncrementing() {
+					if (intervalPromise) {
+						$interval.cancel(intervalPromise);
+						intervalPromise = null;
+					}
+				}
 				limitHolder.assign($scope, DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
 
-				var filterExpression = $attrs.seDelayedListFilter;
-				if (filterExpression) {
-					// reset limit everytime the filter is changed
-					$scope.$watchCollection(filterExpression, function() {
-						limitHolder.assign($scope, DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
-					});
-				}
+				$scope.$watchCollection(listVariableExpression, startIncrementing);
 			}
-			function incrementLimit(limitHolder) {
-				$timeout(function() {
-					var elementsCount = controller.getElementsCount();
-					var newValue = Math.min(controller.getLimit() + DEFAULT_ITEMS_PER_ITERATION_COUNT, elementsCount);
-
-					limitHolder.assign($scope, newValue);
-
-					if (newValue < elementsCount) {
-						incrementLimit(limitHolder);
-					}
-				}, DEFAULT_INTERVAL);
-
-			}
-
 			var limitHolder = $parse($attrs.seDelayedList);
 			atachMethods(limitHolder);
-			resetLimitEverytimeFilterIsChanged(limitHolder);
-			incrementLimit(limitHolder);
+			resetLimitEverytimeFilterOrListIsChanged(limitHolder);
 		}],
 		compile: function(element, attrs) {
-			function addLimitTo(repeatElement) {
-				function getPositionToInsert(repeatExpression) {
-					var trackByRegex = /([^]+)track\s+by\s+.+/g;
-					var match = trackByRegex.exec(repeatExpression);
-					if (!match) {
-						return repeatExpression.length;
-					}
-					return match[1].length;
+			function getTrackByPositionOrEndOfString(repeatExpression) {
+				var trackByRegex = /([^]+)track\s+by\s+.+/g;
+				var match = trackByRegex.exec(repeatExpression);
+				if (!match) {
+					return repeatExpression.length;
 				}
-
+				return match[1].length;
+			}
+			function addLimitTo(repeatElement) {
 				var repeatExpression = repeatElement.attr(ATTR_NG_REPEAT);
-				var positionToInsert = getPositionToInsert(repeatExpression);
+				var positionToInsert = getTrackByPositionOrEndOfString(repeatExpression);
 				var limitTo = " | limitTo:" + attrs.seDelayedList + " ";
 
 				var result = repeatExpression.slice(0, positionToInsert) + limitTo + repeatExpression.slice(positionToInsert);
@@ -97,11 +80,22 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 
 				repeatElement.attr(ATTR_NG_REPEAT, result);
 			}
-
-			var repeatElement = getRepeatElement(element);
-			if (!repeatElement) {
-				throw "seDelayedList: no repeat element";
+			function getListVariableExpression(repeatElement) {
+				var repeatExpression = repeatElement.attr(ATTR_NG_REPEAT);
+				var repeatExpressionWithoutTrackBy = repeatExpression.substring(0, getTrackByPositionOrEndOfString(repeatExpression));
+				// always there should be | - for limitTo
+				var trackByRegex = /.+\s+in\s+(.+)(\|.+)?/g;
+				var match = trackByRegex.exec(repeatExpressionWithoutTrackBy);
+				if (!match) {
+					throw "seDelayedList: can't get list name: " + repeatExpression;
+				}
+				return match[1];
 			}
+			var repeatElement = getRepeatElement(element);
+			// will be used in controller
+			// in controller there may be no repeat element (in collection is empty)
+			// so we will have to wait for at least one element before getting the name
+			attrs.$$seDelayedListListVariableExpression = getListVariableExpression(repeatElement);
 			addLimitTo(repeatElement);
 		}
 	};
