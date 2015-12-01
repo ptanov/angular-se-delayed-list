@@ -1,0 +1,23 @@
+<html data-ng-app="seDelayedListDirectiveDemoApp" data-ng-controller="DemoCtrl as demoCtrl">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>seDelayedListDirectiveDemoApp</title>
+	</head>
+	<body>
+		<div>
+			<table class="table table-bordered">
+				<tbody>
+					<tr data-ng-repeat="user in demoCtrl.users track by user.id">
+						<td>
+							{{user.id}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.js"></script>
+		<script src="scripts/demoCtrl.js"></script>
+	</body>
+</html>
