@@ -19,6 +19,7 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 			var listVariableExpression = $attrs.$$seDelayedListListVariableExpression;
 			var listVariableHolder = $parse(listVariableExpression);
 			var intervalPromise;
+			var lastCollectionCount = 0;
 
 			function atachMethods(limitHolder) {
 				controller.getElementsCount = function getElementsCount() {
@@ -32,9 +33,14 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 
 			function resetLimitEverytimeFilterOrListIsChanged(limitHolder) {
 				function startIncrementing() {
+					var previousLastCollectionCount = lastCollectionCount;
 					stopIncrementing();
 
-					limitHolder.assign($scope, DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
+					var delta = controller.getElementsCount() - previousLastCollectionCount;
+					if (delta < DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST && controller.getLimit() >= controller.getElementsCount()) {
+						return;
+					}
+					limitHolder.assign($scope, previousLastCollectionCount + DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
 
 					intervalPromise = $interval(function() {
 						var elementsCount = controller.getElementsCount();
@@ -48,13 +54,14 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 					}, DEFAULT_INTERVAL);
 				}
 				function stopIncrementing() {
+					lastCollectionCount = controller.getElementsCount();
+
 					if (intervalPromise) {
 						$interval.cancel(intervalPromise);
 						intervalPromise = null;
 					}
 				}
 				limitHolder.assign($scope, DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
-
 				$scope.$watchCollection(listVariableExpression, startIncrementing);
 			}
 			var limitHolder = $parse($attrs.seDelayedList);

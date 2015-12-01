@@ -94,13 +94,17 @@ describe("seDelayedList", function () {
 
 	describe("link stage", function () {
 		describe("increase limit", function () {
-			function iterateOverLimit(limitHolder, elementsCount) {
-				var expectedCount = DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST;
+			function iterateOverLimit(limitHolder, elementsCount, initialElementsCount) {
+				var expectedCount = initialElementsCount || DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST;
 
-				expect(limitHolder.limit).toBe(expectedCount);
+				// expect(limitHolder.limit).toBe(expectedCount);
 
 				scope.$digest();
 				expect(limitHolder.limit).toBe(expectedCount);
+				if (expectedCount >= elementsCount) {
+					expectLimit(limitHolder, expectedCount);
+					return;
+				}
 
 				do {
 					$interval.flush(DEFAULT_INTERVAL - BEFORE_INTERVAL);
@@ -118,6 +122,18 @@ describe("seDelayedList", function () {
 				$interval.flush(DEFAULT_INTERVAL * 2);
 				scope.$digest();
 				expect(limitHolder.limit).toBe(expectedCount);
+			}
+			function expectLimit(limitHolder, expectedLimit) {
+				scope.$digest();
+				expect(limitHolder.limit).toBe(expectedLimit);
+
+				scope.$digest();
+				expect(limitHolder.limit).toBe(expectedLimit);
+
+				// be sure that there are no increments
+				$interval.flush(DEFAULT_INTERVAL * 2);
+				scope.$digest();
+				expect(limitHolder.limit).toBe(expectedLimit);
 			}
 			beforeEach(inject(function () {
 				scope.demoCtrl = {
@@ -175,6 +191,31 @@ describe("seDelayedList", function () {
 
 				iterateOverLimit(scope.demoCtrl, scope.demoCtrl.users.length);
 			}));
+			it("should listen for elements changes and reset limit with initial data", inject(function () {
+				element = angular.element(
+					"<div data-se-delayed-list='demoCtrl.limit'>" +
+					"	<div data-ng-repeat='user in demoCtrl.users' ></div>" +
+					"</div>");
+				repeatElement = element.find("div");
+
+				var initialElementsCount = (DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST+DEFAULT_ITEMS_PER_ITERATION_COUNT*10);
+
+				for(var i = 0;i<initialElementsCount;i++) {
+					scope.demoCtrl.users.push({id: i});
+				}
+
+				element = $compile(element)(scope);
+				// initial value
+				iterateOverLimit(scope.demoCtrl, scope.demoCtrl.users.length);
+
+				// populate with items after initializing
+				for(i = initialElementsCount;i<2*initialElementsCount;i++) {
+					scope.demoCtrl.users.push({id: i});
+				}
+				scope.$digest();
+
+				iterateOverLimit(scope.demoCtrl, scope.demoCtrl.users.length, initialElementsCount + DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
+			}));
 			it("should listen for filter changes and reset limit", inject(function () {
 				var trueCount = 0;
 				for(var i = 0;i<(DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST + DEFAULT_ITEMS_PER_ITERATION_COUNT*10);i++) {
@@ -201,9 +242,92 @@ describe("seDelayedList", function () {
 				scope.demoCtrl.filter.even = true;
 
 				expect(controller.getElementsCount()).toBe(trueCount);
+
+				expectLimit(scope.demoCtrl, scope.demoCtrl.users.length);
+			}));
+			it("should listen for filter changes and reset limit - when filter is unset", inject(function () {
+				var trueCount = 0;
+				for(var i = 0;i<(DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST + DEFAULT_ITEMS_PER_ITERATION_COUNT*10);i++) {
+					scope.demoCtrl.users.push({id: i, even: (i%2)===0});
+					if ((i%2)===0) {
+						trueCount++;
+					}
+				}
+				scope.demoCtrl.filter = {
+					even: true
+				};
+				element = angular.element(
+					"<div data-se-delayed-list='demoCtrl.limit'>" +
+					"	<div data-ng-repeat='user in demoCtrl.users | filter:demoCtrl.filter' ></div>" +
+					"</div>");
+				repeatElement = element.find("div");
+
+				element = $compile(element)(scope);
+				var controller = element.data("$seDelayedListController");
+
+				// initial value - all items
+				iterateOverLimit(scope.demoCtrl, trueCount);
+
+				// populate with items after filter
+				scope.demoCtrl.filter = {};
+
+				expect(controller.getElementsCount()).toBe(scope.demoCtrl.users.length);
+
+				iterateOverLimit(scope.demoCtrl, scope.demoCtrl.users.length, trueCount + DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
+			}));
+
+			it("should listen for elements remove and do not reset limit", inject(function () {
+				element = angular.element(
+					"<div data-se-delayed-list='demoCtrl.limit'>" +
+					"	<div data-ng-repeat='user in demoCtrl.users' ></div>" +
+					"</div>");
+				repeatElement = element.find("div");
+
+				for(var i = 0;i<(DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST+DEFAULT_ITEMS_PER_ITERATION_COUNT*10);i++) {
+					scope.demoCtrl.users.push({id: i});
+				}
+
+				element = $compile(element)(scope);
+				iterateOverLimit(scope.demoCtrl, scope.demoCtrl.users.length);
+
+				// remove items after initializing
+
+				scope.demoCtrl.users.splice(0, 1);
+				scope.demoCtrl.users.splice(5, 2);
+
+				var expectedLimit = scope.demoCtrl.limit;
+
+				expectLimit(scope.demoCtrl, expectedLimit);
+			}));
+
+			it("should listen for elements add after 0 and reset limit", inject(function () {
+				element = angular.element(
+					"<div data-se-delayed-list='demoCtrl.limit'>" +
+					"	<div data-ng-repeat='user in demoCtrl.users' ></div>" +
+					"</div>");
+				repeatElement = element.find("div");
+				var elementsCount = (DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST+DEFAULT_ITEMS_PER_ITERATION_COUNT*10);
+
+				for(var i = 0;i<elementsCount;i++) {
+					scope.demoCtrl.users.push({id: i});
+				}
+
+				element = $compile(element)(scope);
+				// initial value
+				iterateOverLimit(scope.demoCtrl, scope.demoCtrl.users.length);
+
+				// remove items after initializing
+
+				scope.demoCtrl.users = [];
 				scope.$digest();
 
-				iterateOverLimit(scope.demoCtrl, trueCount);
+				expectLimit(scope.demoCtrl, elementsCount);
+				for(i = 0;i<(DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST+DEFAULT_ITEMS_PER_ITERATION_COUNT*10);i++) {
+					scope.demoCtrl.users.push({id: i});
+				}
+				scope.$digest();
+
+				iterateOverLimit(scope.demoCtrl, scope.demoCtrl.users.length);
 			}));
 
 		});

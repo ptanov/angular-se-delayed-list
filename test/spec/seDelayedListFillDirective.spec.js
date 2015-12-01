@@ -49,7 +49,11 @@ describe("seDelayedListFill", function () {
 		scope.$digest();
 		expectVisible();
 
-		scope.demoCtrl.users.push({});
+
+		for(var i = scope.demoCtrl.users.length;i<2*(DEFAULT_ITEMS_PER_ITERATION_COUNT*10+3);i++) {
+			scope.demoCtrl.users.push({id: i});
+		}
+
 		scope.$digest();
 		expectVisible();
 
