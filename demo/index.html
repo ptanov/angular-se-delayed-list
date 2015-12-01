@@ -1,32 +1,20 @@
-<html data-ng-app="seDelayedListDirectiveDemoApp" data-ng-controller="DemoCtrl as demoCtrl">
+<html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>seDelayedListDirectiveDemoApp</title>
 	</head>
 	<body>
-		Displaying {{demoCtrl.limit}} elements
-		<div data-se-delayed-list="demoCtrl.limit">
-			<table class="table table-bordered">
-				<tbody>
-					<tr data-ng-repeat="user in demoCtrl.users track by user.id">
-						<td>
-							{{user.id}}
-						</td>
-					</tr>
-					<tr data-se-delayed-list-fill="40"
-						style="background: url('https://i1.wp.com/cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif') center top no-repeat;">
-						<!-- you can get loader from: http://www.ajaxload.info/ and use classes, not style-->
-						<td></td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-
-		<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.js"></script>
-		<script src="scripts/demoCtrl.js"></script>
-		<script src="../src/seDelayedListModule.js"></script>
-		<script src="../src/seDelayedListDirective.js"></script>
-		<script src="../src/seDelayedListFillDirective.js"></script>
+		<table>
+			<tr>
+				<td>
+					<a href="on.html">Long page with project enabled</a>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<a href="on.html">Long page without project enabled</a>
+				</td>
+			</tr>
+		</table>
 	</body>
 </html>

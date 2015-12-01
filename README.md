@@ -1,18 +1,56 @@
 # What is this
-TODO
+
+This project prevents page freezing when displaying long lists and tables.
+This is done using auto-inserted ```| limit``` in ```ng-repeat```.
+Page or element scroll is displayed using auto-created element with calculated height.
 
 # Demo:
-See http://ptanov.github.io/angular-se-delayed-list/demo and https://github.com/ptanov/angular-se-delayed-list/tree/master/demo
+Demo:
+ - http://ptanov.github.io/angular-se-delayed-list/demo
+
+Demo source:
+ - https://github.com/ptanov/angular-se-delayed-list/tree/master/demo
 
 # Install:
 
- - ```bower install angular-se-delayed-list --save```
- - Add ```angular.module("seDelayedListDirectiveDemoApp", ["seDelayedList"])...```
+ - Add library to your project: ```bower install angular-se-delayed-list --save```
+ - Add module to your project: ```angular.module("seDelayedListDirectiveDemoApp", ["seDelayedList"])...```
+ - Add ```se-delayed-list directive``` in element before ```ng-repeat```:
+ ```html
+   <div data-se-delayed-list="demoCtrl.limit">
+      <table class="table table-bordered">
+         ...(data-ng-repeat="expression")...
+      </table>
+   </div>
+```
+ - Add 'fill' element to preserve scroll size (```se-delayed-list-fill```) next to ```ng-repeat```:
+```html
+
+ <tbody>
+    <tr data-ng-repeat="user in demoCtrl.users track by user.id">
+       ...
+    </tr>
+    <tr data-se-delayed-list-fill="40">
+       ...(add td here - keep correct table structure)...
+    </tr>
+ </tbody>
+```
+
+- Optionally you can add waiter image:
+```html
+
+   <tr data-se-delayed-list-fill="40"
+      style="background: url('https://i1.wp.com/cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif') center top no-repeat;">
+      <!-- you can get loader from: http://www.ajaxload.info/ and use classes, not style -->
+      <td></td>
+   </tr>
+```
 
 # Limitations:
- - *jQuery* is required - find("[data-ng-repeat]");
- - works only if ng-repeat is set with data-ng-repeat
+ - ```jQuery``` is required - ```find("[data-ng-repeat]");```
+ - works only if ```ng-repeat``` is set with ```data-ng-repeat```
 
+# For developers:
 # Setup
 
 Developer should have *w3c validator*, *git*, *npm*, *grunt* and *bower* installed.
