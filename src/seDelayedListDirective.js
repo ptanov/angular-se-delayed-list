@@ -62,6 +62,7 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 					}
 				}
 				limitHolder.assign($scope, DEFAULT_ITEMS_PER_ITERATION_COUNT_FIRST);
+				$scope.$on("$destroy", stopIncrementing);
 				$scope.$watchCollection(listVariableExpression, startIncrementing);
 			}
 			var limitHolder = $parse($attrs.seDelayedList);
