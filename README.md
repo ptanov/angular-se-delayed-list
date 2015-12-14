@@ -1,7 +1,7 @@
 # What is this
 
 This project prevents page freezing when displaying long lists and tables.
-This is done using auto-inserted ```| limit``` in ```ng-repeat```.
+This is done using auto-inserted ```| limitTo``` in ```ng-repeat```.
 Page or element scroll is displayed using auto-created element with calculated height.
 
 # Demo:
@@ -15,7 +15,7 @@ Demo source:
 
  - Add library to your project: ```bower install angular-se-delayed-list --save```
  - Add module to your project: ```angular.module("seDelayedListDirectiveDemoApp", ["seDelayedList"])...```
- - Add ```se-delayed-list directive``` in element before ```ng-repeat```:
+ - Add ```se-delayed-list directive``` in element before ```ng-repeat``` (note that ```demoCtrl.limit``` is a random variable where current limit will be stored and auto-appended to ```| limitTo``` filter ):
  ```html
    <div data-se-delayed-list="demoCtrl.limit">
       <table class="table table-bordered">
