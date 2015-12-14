@@ -36,8 +36,8 @@ module.exports = function (grunt) {
 				return [
 					"jshint",
 					"karma:unit",
-					"htmlangular:index",
-					"htmlangular:continuous",
+					// "htmlangular:index",
+					// "htmlangular:continuous",
 					"flow:app"
 				];
 			} else {
@@ -312,7 +312,7 @@ module.exports = function (grunt) {
 		grunt.registerTask("build", [
 			// "prepare",
 			"test",
-			"concurrent:dist",
+			// "concurrent:dist",
 			"replace:versionInfo"
 		]);
 
