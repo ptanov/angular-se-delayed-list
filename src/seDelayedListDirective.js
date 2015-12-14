@@ -54,7 +54,7 @@ angular.module("seDelayedList.seDelayedList", []).directive("seDelayedList", fun
 					}, DEFAULT_INTERVAL);
 				}
 				function stopIncrementing() {
-					lastCollectionCount = controller.getElementsCount();
+					lastCollectionCount = controller.getElementsCount() || 0;
 
 					if (intervalPromise) {
 						$interval.cancel(intervalPromise);
