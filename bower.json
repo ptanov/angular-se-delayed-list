@@ -9,7 +9,7 @@
     "angular-mocks": "~1.4.3",
     "angular-scenario": "~1.4.3"
   },
-  "homepage": "https://github.com/ptanov/angular-se-delayed-list",
+  "homepage": "https://github.com/setelis/angular-se-delayed-list",
   "authors": [
     "Plamen Tanov <ptanov@setelis.com>"
   ],

@@ -6,10 +6,10 @@ Page or element scroll is displayed using auto-created element with calculated h
 
 # Demo:
 Demo:
- - http://ptanov.github.io/angular-se-delayed-list/demo
+ - http://setelis.github.io/angular-se-delayed-list/demo
 
 Demo source:
- - https://github.com/ptanov/angular-se-delayed-list/tree/master/demo
+ - https://github.com/setelis/angular-se-delayed-list/tree/master/demo
 
 # Install:
 
