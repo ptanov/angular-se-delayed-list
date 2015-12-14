@@ -4,7 +4,7 @@ angular.module("seDelayedListDirectiveDemoApp", ["seDelayedList"]).controller("D
 
 	function initState() {
 		controller.users = [];
-		for(var i = 0;i<30000;i++) {
+		for(var i = 0;i<10005;i++) {
 			controller.users.push({id: i});
 		}
 	}
